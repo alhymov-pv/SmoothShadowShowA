@@ -4,7 +4,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms,
-  GdiPlusAPI, Threading;
+  GdiPlusAPI, Threading, FadeThread;
 
 type
   TGradientShape = (gsPillow, gsSphere, gsCone);

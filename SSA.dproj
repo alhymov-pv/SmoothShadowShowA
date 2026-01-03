@@ -129,6 +129,9 @@
         </DCCReference>
         <DCCReference Include="GdiPlusAPI.pas"/>
         <DCCReference Include="ShadowForm.pas"/>
+        <DCCReference Include="GdiPlusManager.pas"/>
+        <DCCReference Include="FadeThread.pas"/>
+        <DCCReference Include="OptionsManager.pas"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>
