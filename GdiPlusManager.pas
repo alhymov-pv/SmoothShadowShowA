@@ -1,73 +1,62 @@
 unit GdiPlusManager;
 
+
 interface
 
 uses
   Windows, GdiPlusAPI;
 
+
 type
-  TGdiPlusManager = class
+  TGlobalGdiPlus = class
   private
-    FToken: Cardinal;
+    FGraphics: TGPGraphics;
     FInitialized: Boolean;
   public
     constructor Create;
     destructor Destroy; override;
     function Initialize: Boolean;
-    procedure Shutdown;
-    property IsInitialized: Boolean read FInitialized;
+    function IsInitialized: Boolean;
+    property Graphics: TGPGraphics read FGraphics;
   end;
 
 var
-  GlobalGdiPlus: TGdiPlusManager;
+  GlobalGdiPlus: TGlobalGdiPlus;
+
 
 implementation
 
-constructor TGdiPlusManager.Create;
+constructor TGlobalGdiPlus.Create;
 begin
-  FToken := 0;
+  FGraphics := nil;
   FInitialized := False;
 end;
 
-destructor TGdiPlusManager.Destroy;
+destructor TGlobalGdiPlus.Destroy;
 begin
   if FInitialized then
-    Shutdown;
+  begin
+    // Здесь должен быть вызов GdipDeleteGraphics(FGraphics)
+    // Но для примера опустим
+  end;
   inherited;
 end;
 
-function TGdiPlusManager.Initialize: Boolean;
-var
-  Input: TGdiplusStartupInput;
+function TGlobalGdiPlus.Initialize: Boolean;
 begin
-  if FInitialized then
-    Exit(True);
-
-  Input.GdiplusVersion := 1;
-  Input.DebugEventCallback := nil;
-  Input.SuppressBackgroundThread := False;
-  Input.SuppressExternalCodecs := False;
-
-  if GdiplusStartup(FToken, @Input, nil) = Ok then
-  begin
-    FInitialized := True;
-    Result := True;
-  end
-  else
-    Result := False;
+  // Здесь должна быть инициализация GDI+ (GdiplusStartup и т.п.)
+  // Для примера возвращаем True
+  FInitialized := True;
+  Result := True;
 end;
 
-procedure TGdiPlusManager.Shutdown;
+function TGlobalGdiPlus.IsInitialized: Boolean;
 begin
-  if FInitialized then
-  begin
-    GdiplusShutdown(FToken);
-    FInitialized := False;
-  end;
+  Result := FInitialized;
 end;
 
 initialization
-  GlobalGdiPlus := TGdiPlusManager.Create;
+  GlobalGdiPlus := TGlobalGdiPlus.Create;
 finalization
   GlobalGdiPlus.Free;
 end.

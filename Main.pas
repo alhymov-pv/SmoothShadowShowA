@@ -21,25 +21,40 @@ var
 
 implementation
 uses
-  ShadowForm;
+  ShadowForm, OptionsManager;
 
 {$R *.dfm}
 
 procedure TMainForm.Button1Click(Sender: TObject);
 var
+  Options: TForm;
   Shadow: TShadowForm;
-  Result: TModalResult;
+  ModalResult: TModalResult;
 begin
-  Shadow := TShadowForm.Create(nil);
+  Options := TOptionsManager.CreateOptionsForm(Self);
   try
-    Result := Shadow.ShowModalShadow(Handle, 50, gsPillow, 2.5);
-    if Result = mrOk then
-      ShowMessage('Выбрано OK')
-    else
-      ShowMessage('Выбрано Отмена');
+    Shadow := TShadowForm.Create(nil);
+    try
+      ModalResult := Shadow.ShowModalShadow(
+        Handle,                    // Родительское окно
+        Options,                   // Форма опций
+        70,                      // Непрозрачность 70%
+        gsSphere,                  // Форма градиента
+        2.0                      // Время появления (сек)
+      );
+
+      case ModalResult of
+        mrOk: ShowMessage('OK');
+        mrCancel: ShowMessage('Отмена');
+        else ShowMessage('Результат: ' + IntToStr(ModalResult));
+      end;
+    finally
+      Shadow.Free;
+    end;
   finally
-    Shadow.Free;
+    Options.Free;
   end;
 end;
+
 
 end.

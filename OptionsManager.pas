@@ -3,7 +3,7 @@ unit OptionsManager;
 interface
 
 uses
-  Forms, StdCtrls, Classes, Controls;  // Controls гарантирует доступ к mrOk
+  Forms, StdCtrls, Classes, Controls;
 
 type
   TOptionsManager = class
@@ -33,7 +33,7 @@ begin
     BtnOK := TButton.Create(Form);
     BtnOK.Parent := Form;
     BtnOK.Caption := 'OK';
-    BtnOK.ModalResult := mrOk;            // Теперь точно доступно
+    BtnOK.ModalResult := mrOk;
     BtnOK.Left := Form.ClientWidth - Margin - 80;
     BtnOK.Top := Form.ClientHeight - Margin - 32;
     BtnOK.Width := 80;
@@ -42,7 +42,7 @@ begin
     BtnCancel := TButton.Create(Form);
     BtnCancel.Parent := Form;
     BtnCancel.Caption := 'Отмена';
-    BtnCancel.ModalResult := mrCancel;    // Теперь точно доступно
+    BtnCancel.ModalResult := mrCancel;
     BtnCancel.Left := BtnOK.Left - 90;
     BtnCancel.Top := BtnOK.Top;
     BtnCancel.Width := 80;
@@ -60,16 +60,35 @@ begin
 end;
 
 class procedure TOptionsManager.CenterFormRelativeTo(Form, ParentForm: TForm);
+var
+  ParentClientWidth, ParentClientHeight: Integer;
+  FormClientWidth, FormClientHeight: Integer;
+  TitleBarHeight: Integer;
 begin
-  if Assigned(ParentForm) then
-  begin
-    Form.Left := ParentForm.Left + (ParentForm.Width div 2) - (Form.Width div 2);
-    Form.Top := ParentForm.Top + (ParentForm.Height div 2) - (Form.Height div 2);
-  end
-  else
+  if not Assigned(ParentForm) then
   begin
     Form.Position := poScreenCenter;
+    Exit;
   end;
+
+  // Размеры клиентской области родителя (без рамки)
+  ParentClientWidth := ParentForm.ClientWidth;
+  ParentClientHeight := ParentForm.ClientHeight;
+
+  // Размеры клиентской области дочерней формы
+  FormClientWidth := Form.ClientWidth;
+  FormClientHeight := Form.ClientHeight;
+
+  // Примерная высота заголовка окна (зависит от темы ОС)
+  TitleBarHeight := 30;
+
+
+  // Центрирование по горизонтали
+  Form.Left := ParentForm.Left + (ParentClientWidth - FormClientWidth) div 2;
+
+  // Центрирование по вертикали (с поправкой на заголовок)
+  Form.Top := ParentForm.Top + TitleBarHeight +
+    (ParentClientHeight - FormClientHeight - TitleBarHeight) div 2;
 end;
 
 end.

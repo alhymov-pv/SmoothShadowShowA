@@ -3,7 +3,7 @@
 interface
 
 uses
-  Classes, Controls, Forms, Windows, Messages, SysUtils;
+  Classes, Controls, Forms, Types, Math;
 
 type
   TFadeThread = class(TThread)
@@ -13,12 +13,15 @@ type
     FFadeInTime: Double;
     FFadeOutTime: Double;
     FTargetOpacity: Byte;
-    FOpacityProp: PByte;  // Было: ^Byte → стало: PByte
+    FOpacityProp: PByte;
+
+    // Вспомогательный метод для Synchronize
+    procedure DoFormClose;
   protected
     procedure Execute; override;
   public
     constructor Create(AForm: TCustomForm; Direction: Integer;
-      TargetOpacity: Byte; FadeInSec, FadeOutSec: Double; OpacityPtr: PByte);  // PByte
+      TargetOpacity: Byte; FadeInSec, FadeOutSec: Double; OpacityPtr: PByte);
   end;
 
 implementation
@@ -33,7 +36,13 @@ begin
   FTargetOpacity := TargetOpacity;
   FFadeInTime := FadeInSec;
   FFadeOutTime := FadeOutSec;
-  FOpacityProp := OpacityPtr;  // Сохраняем PByte
+  FOpacityProp := OpacityPtr;
+end;
+
+procedure TFadeThread.DoFormClose;
+begin
+  if FFadeDirection = -1 then
+    FForm.Close;
 end;
 
 procedure TFadeThread.Execute;
@@ -51,37 +60,26 @@ begin
     Elapsed := (GetTickCount - StartTime) / 1000.0;
 
     if FFadeDirection = 1 then // Появление
-    begin
-      NewOpacity := Round(Elapsed / FFadeInTime * FTargetOpacity);
-      if NewOpacity >= FTargetOpacity then
-        NewOpacity := FTargetOpacity;
-    end
+      NewOpacity := Round(Elapsed / FFadeInTime * FTargetOpacity)
     else // Исчезновение
-    begin
       NewOpacity := Round((1 - Elapsed / FFadeOutTime) * FTargetOpacity);
-      if NewOpacity <= 0 then
-        NewOpacity := 0;
-    end;
 
-    // Пишем через PByte
-    FOpacityProp^ := NewOpacity;  // Разыменование PByte — корректно
+    // Ограничиваем значения
+    NewOpacity := Min(Max(NewOpacity, 0), FTargetOpacity);
 
-    // Перерисовываем и обновляем
+    FOpacityProp^ := NewOpacity;
+
     Synchronize(procedure
     begin
       FForm.Invalidate;
       FForm.Update;
     end);
 
-    // Проверяем завершение
-    if (FFadeDirection = 1) and (NewOpacity >= FTargetOpacity) or
-       (FFadeDirection = -1) and (NewOpacity <= 0) then
+    // Проверяем завершение (с правильными скобками!)
+    if ((FFadeDirection = 1) and (NewOpacity >= FTargetOpacity)) or
+       ((FFadeDirection = -1) and (NewOpacity <= 0)) then
     begin
-      Synchronize(procedure
-      begin
-        if FFadeDirection = -1 then
-          FForm.Close;
-      end);
+      Synchronize(DoFormClose); // Вызываем метод вместо анонимной процедуры
       Exit;
     end;
 
