@@ -251,26 +251,24 @@ var
   LB: TListBox;
   BtnOK, BtnCancel: TButton;
   Margin: Integer;
+  ParentCenterX, ParentCenterY: Integer;
 begin
   OptionsForm := TForm.Create(Self);
   try
     OptionsForm.Caption := 'Опции';
     OptionsForm.BorderStyle := bsDialog;
-    OptionsForm.Position := poOwnerFormCenter;
-    OptionsForm.Parent := Self;
+    OptionsForm.Parent := Self;  // Родитель — наша тень
     OptionsForm.FormStyle := fsStayOnTop;
 
-    // Отступы от краёв формы
     Margin := 16;
 
-    // Чекбокс
+    // Элементы (как раньше)
     CB := TCheckBox.Create(OptionsForm);
     CB.Parent := OptionsForm;
     CB.Caption := 'Включить режим';
     CB.Left := Margin;
     CB.Top := Margin;
 
-    // Выпадающий список (TListBox как аналог)
     LB := TListBox.Create(OptionsForm);
     LB.Parent := OptionsForm;
     LB.Left := Margin;
@@ -281,7 +279,6 @@ begin
     LB.Items.Add('Вариант 2');
     LB.Items.Add('Вариант 3');
 
-    // Кнопка OK
     BtnOK := TButton.Create(OptionsForm);
     BtnOK.Parent := OptionsForm;
     BtnOK.Caption := 'OK';
@@ -290,7 +287,6 @@ begin
     BtnOK.Top := LB.Top + LB.Height + 16;
     BtnOK.Width := 80;
 
-    // Кнопка Отмена
     BtnCancel := TButton.Create(OptionsForm);
     BtnCancel.Parent := OptionsForm;
     BtnCancel.Caption := 'Отмена';
@@ -299,10 +295,8 @@ begin
     BtnCancel.Top := BtnOK.Top;
     BtnCancel.Width := 80;
 
-    // Расчёт размеров формы
-    // Ширина: левый отступ + ширина списка + правый отступ
+    // Расчёт размеров формы (как раньше)
     OptionsForm.Width := Margin + 150 + Margin;
-    // Высота: верхний отступ + (чекбокс + отступ + список + отступ + кнопки) + нижний отступ
     OptionsForm.Height := Margin +
                           CB.Height +
                           8 +
@@ -316,6 +310,15 @@ begin
     OptionsForm.BorderIcons := [biSystemMenu];
 
     OptionsForm.OnClose := OptionsClosed;
+
+    // --- Ключевое изменение: центрирование по родительскому окну ---
+    ParentCenterX := Self.Left + (Self.Width div 2);
+    ParentCenterY := Self.Top + (Self.Height div 2);
+
+    OptionsForm.Left := ParentCenterX - (OptionsForm.Width div 2);
+    OptionsForm.Top  := ParentCenterY - (OptionsForm.Height div 2);
+
+    // ------------------------------------------------------------
 
     FOptionsResult := OptionsForm.ShowModal;
 
