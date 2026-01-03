@@ -51,7 +51,9 @@ uses Dialogs, StdCtrls;
 
 constructor TShadowForm.Create(AOwner: TComponent);
 begin
-  inherited Create(AOwner);
+  // Не вызываем inherited Create(AOwner) — это вызовет поиск DFM
+  CreateNew(AOwner, 0); // Создаём форму без загрузки DFM
+
   BorderStyle := bsNone;
   Color := clBlack;
   TransparentColor := True;
@@ -59,6 +61,7 @@ begin
   DoubleBuffered := True;
   Enabled := False;  // не ловить ввод
 end;
+
 
 destructor TShadowForm.Destroy;
 begin
